@@ -1,0 +1,10 @@
+name: esphome_i2c_sniffer
+description: >
+  I²C sniffer component for ESPHome. Captures bus activity and publishes
+  messages, last address, frame length, and last byte value.
+version: 2.0.0
+requirements: []
+dependencies: [sensor, text_sensor]
+codeowners:
+  - "https://github.com/TheAndi"
+  - "https://github.com/GernotAlthammer"
