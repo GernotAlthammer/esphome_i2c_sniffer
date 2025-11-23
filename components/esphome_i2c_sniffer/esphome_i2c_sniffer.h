@@ -17,12 +17,13 @@ class EsphomeI2cSniffer : public Component {
   void set_msg_sensor(text_sensor::TextSensor *s) { this->msg_sensor_ = s; }
   void set_last_addr_sensor(sensor::Sensor *s) { this->last_addr_sensor_ = s; }
   void set_last_data_sensor(sensor::Sensor *s) { this->last_data_sensor_ = s; }
+  void set_last_byte_sensor(sensor::Sensor *s) { this->last_byte_sensor_ = s; }
 
   void setup() override;
   void loop() override;
   void dump_config() override;
 
-  // Von ISR-Wrappern aufgerufen -> öffentlich
+  // ISR wrappers call these
   void on_scl_edge_();
   void on_sda_edge_();
 
@@ -36,9 +37,10 @@ class EsphomeI2cSniffer : public Component {
   // Entities
   text_sensor::TextSensor *msg_sensor_{nullptr};
   sensor::Sensor *last_addr_sensor_{nullptr};
-  sensor::Sensor *last_data_sensor_{nullptr};
+  sensor::Sensor *last_data_sensor_{nullptr};   // Frame length
+  sensor::Sensor *last_byte_sensor_{nullptr};   // Last byte value
 
-  // Laufzeit-State (von ISR verändert)
+  // Runtime state (modified by ISR)
   volatile bool in_transfer_{false};
   volatile bool last_sda_{true};
   volatile bool last_scl_{true};
