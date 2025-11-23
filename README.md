@@ -6,7 +6,7 @@ esphome_i2c_sniffer — Passive I²C Bus Sniffer for ESPHome
 
     Publishes each decoded I²C transaction as a text sensor (block format, e.g. [40563ms] [0x54]W+(10)+ | [0x54]R+(00)+(00)-).
 
-    Also exposes optional sensors for the last seen address and last data byte.
+    Also exposes optional sensors for the last seen address, last data frame length and last byte value.
 
     Offers a callback interface (on_address) for automations or advanced triggers.
 
@@ -30,6 +30,24 @@ How to use
 
     Add as a Git external component in ESPHome.
 
+    external_components:
+      - source: github://yourgithubuser/esphome-i2c-sniffer
+        components: [ esphome_i2c_sniffer ]
+
     Configure the custom text sensor and (optionally) the two numeric sensors in your ESPHome YAML.
+
+    esphome_i2c_sniffer:
+      id: i2c_sniffer # Set Identifier Name - mandatory for ESPHome 2025.11
+      sda_pin: 4 # GPIO4/D2 SDA I2C-Bus Data
+      scl_pin: 5 # GPIO5/D1 SCL I2C-Bus Clock
+      msg_sensor:
+        name: "I2C Message"
+      last_address_sensor:
+        name: "I2C Last Address"
+      last_data_sensor:
+        name: "I2C Frame Length"
+      last_byte_sensor:
+        name: "I2C Last Byte Value"
+
 
     Flash, then watch decoded I²C activity in Home Assistant and ESPHome logs.
