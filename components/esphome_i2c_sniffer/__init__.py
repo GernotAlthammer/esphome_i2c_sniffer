@@ -3,7 +3,6 @@ import esphome.config_validation as cv
 from esphome.components import text_sensor, sensor
 from esphome.const import CONF_ID
 
-# Stellt sicher, dass die zugehörigen C++-Teile eingebunden werden
 AUTO_LOAD = ["sensor", "text_sensor"]
 
 ns = cg.esphome_ns.namespace("esphome_i2c_sniffer")
@@ -14,6 +13,7 @@ CONF_SCL_PIN = "scl_pin"
 CONF_MSG_SENSOR = "msg_sensor"
 CONF_LAST_ADDRESS_SENSOR = "last_address_sensor"
 CONF_LAST_DATA_SENSOR = "last_data_sensor"
+CONF_LAST_BYTE_SENSOR = "last_byte_sensor"   # <--- neu
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -23,6 +23,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_MSG_SENSOR): text_sensor.text_sensor_schema(),
         cv.Optional(CONF_LAST_ADDRESS_SENSOR): sensor.sensor_schema(accuracy_decimals=0),
         cv.Optional(CONF_LAST_DATA_SENSOR): sensor.sensor_schema(accuracy_decimals=0),
+        cv.Optional(CONF_LAST_BYTE_SENSOR): sensor.sensor_schema(accuracy_decimals=0),  # <--- neu
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -42,5 +43,9 @@ async def to_code(config):
     if CONF_LAST_DATA_SENSOR in config:
         d = await sensor.new_sensor(config[CONF_LAST_DATA_SENSOR])
         cg.add(var.set_last_data_sensor(d))
+
+    if CONF_LAST_BYTE_SENSOR in config:   # <--- neu
+        b = await sensor.new_sensor(config[CONF_LAST_BYTE_SENSOR])
+        cg.add(var.set_last_byte_sensor(b))
 
     await cg.register_component(var, config)
