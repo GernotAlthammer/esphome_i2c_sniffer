@@ -90,6 +90,11 @@ void IRAM_ATTR EsphomeI2cSniffer::on_scl_edge_() {
         this->addr_ = (this->cur_byte_ >> 1) & 0x7F;
         this->rw_ = (this->cur_byte_ & 0x01) != 0;
         this->have_addr_ = true;
+
+        // ✅ Fix: make a local copy to drop 'volatile'
+        uint8_t addr_copy = this->addr_;
+        this->on_address_trigger_.trigger(addr_copy);
+
       } else {
         if (this->data_len_ < MAX_DATA_) {
           this->data_[this->data_len_++] = this->cur_byte_;
@@ -101,7 +106,6 @@ void IRAM_ATTR EsphomeI2cSniffer::on_scl_edge_() {
 
   this->last_scl_ = scl;
 }
-
 void EsphomeI2cSniffer::publish_frame_(uint8_t addr, bool rw, const uint8_t *data, uint8_t len) {
   // Build a string with address, R/W, length, and full data
   char buf[256];
@@ -128,7 +132,7 @@ void EsphomeI2cSniffer::publish_frame_(uint8_t addr, bool rw, const uint8_t *dat
     this->last_data_sensor_->publish_state(static_cast<float>(len));
   }
 
-  // Optional: publish the last byte value separately
+  // Publish the last byte value separately
   if (this->last_byte_sensor_ != nullptr) {
     uint8_t last = (len > 0) ? data[len - 1] : 0;
     this->last_byte_sensor_->publish_state(static_cast<float>(last));
