@@ -2,21 +2,18 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import text_sensor, sensor
 from esphome.const import CONF_ID
-from esphome import automation
 
 AUTO_LOAD = ["sensor", "text_sensor"]
 
 ns = cg.esphome_ns.namespace("esphome_i2c_sniffer")
 EsphomeI2cSniffer = ns.class_("EsphomeI2cSniffer", cg.Component)
 
-# Konfigurations-Keys
 CONF_SDA_PIN = "sda_pin"
 CONF_SCL_PIN = "scl_pin"
 CONF_MSG_SENSOR = "msg_sensor"
 CONF_LAST_ADDRESS_SENSOR = "last_address_sensor"
 CONF_LAST_DATA_SENSOR = "last_data_sensor"
-CONF_LAST_BYTE_SENSOR = "last_byte_sensor"
-CONF_ON_ADDRESS = "on_address"
+CONF_LAST_BYTE_SENSOR = "last_byte_sensor"   # <--- neu
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -26,8 +23,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_MSG_SENSOR): text_sensor.text_sensor_schema(),
         cv.Optional(CONF_LAST_ADDRESS_SENSOR): sensor.sensor_schema(accuracy_decimals=0),
         cv.Optional(CONF_LAST_DATA_SENSOR): sensor.sensor_schema(accuracy_decimals=0),
-        cv.Optional(CONF_LAST_BYTE_SENSOR): sensor.sensor_schema(accuracy_decimals=0),
-        cv.Optional(CONF_ON_ADDRESS): automation.validate_automation()
+        cv.Optional(CONF_LAST_BYTE_SENSOR): sensor.sensor_schema(accuracy_decimals=0),  # <--- neu
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -36,12 +32,10 @@ async def to_code(config):
     cg.add(var.set_sda_pin(config[CONF_SDA_PIN]))
     cg.add(var.set_scl_pin(config[CONF_SCL_PIN]))
 
-    # Textsensor für Nachrichten
     if CONF_MSG_SENSOR in config:
         t = await text_sensor.new_text_sensor(config[CONF_MSG_SENSOR])
         cg.add(var.set_msg_sensor(t))
 
-    # Numerische Sensoren
     if CONF_LAST_ADDRESS_SENSOR in config:
         a = await sensor.new_sensor(config[CONF_LAST_ADDRESS_SENSOR])
         cg.add(var.set_last_addr_sensor(a))
@@ -50,14 +44,8 @@ async def to_code(config):
         d = await sensor.new_sensor(config[CONF_LAST_DATA_SENSOR])
         cg.add(var.set_last_data_sensor(d))
 
-    if CONF_LAST_BYTE_SENSOR in config:
+    if CONF_LAST_BYTE_SENSOR in config:   # <--- neu
         b = await sensor.new_sensor(config[CONF_LAST_BYTE_SENSOR])
         cg.add(var.set_last_byte_sensor(b))
-
-    # Automation Trigger für on_address
-    if CONF_ON_ADDRESS in config:
-        await automation.build_automation(
-            var.get_on_address_trigger(), [(cg.uint8, "x")], config[CONF_ON_ADDRESS]
-        )
 
     await cg.register_component(var, config)
