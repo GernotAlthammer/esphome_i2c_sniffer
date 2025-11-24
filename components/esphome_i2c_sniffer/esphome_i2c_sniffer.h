@@ -5,32 +5,25 @@
 #include "esphome/core/log.h"
 #include "esphome/components/text_sensor/text_sensor.h"
 #include "esphome/components/sensor/sensor.h"
-#include "esphome/core/automation.h"
 
 namespace esphome {
 namespace esphome_i2c_sniffer {
 
 class EsphomeI2cSniffer : public Component {
  public:
-  // Pin setters
   void set_sda_pin(uint8_t pin) { this->sda_pin_ = pin; }
   void set_scl_pin(uint8_t pin) { this->scl_pin_ = pin; }
 
-  // Sensor setters
   void set_msg_sensor(text_sensor::TextSensor *s) { this->msg_sensor_ = s; }
   void set_last_addr_sensor(sensor::Sensor *s) { this->last_addr_sensor_ = s; }
   void set_last_data_sensor(sensor::Sensor *s) { this->last_data_sensor_ = s; }
   void set_last_byte_sensor(sensor::Sensor *s) { this->last_byte_sensor_ = s; }
 
-  // Trigger getter
-  Trigger<uint8_t> *get_on_address_trigger() { return &this->on_address_trigger_; }
-
-  // Lifecycle
   void setup() override;
   void loop() override;
   void dump_config() override;
 
-  // ISR entry points
+  // ISR wrappers call these
   void on_scl_edge_();
   void on_sda_edge_();
 
@@ -46,9 +39,6 @@ class EsphomeI2cSniffer : public Component {
   sensor::Sensor *last_addr_sensor_{nullptr};
   sensor::Sensor *last_data_sensor_{nullptr};   // Frame length
   sensor::Sensor *last_byte_sensor_{nullptr};   // Last byte value
-
-  // Automation trigger
-  Trigger<uint8_t> on_address_trigger_;
 
   // Runtime state (modified by ISR)
   volatile bool in_transfer_{false};
