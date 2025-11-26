@@ -48,6 +48,14 @@ How to use
         name: "I2C Frame Length"
       last_byte_sensor:
         name: "I2C Last Byte Value"
+      on_address:
+        - lambda: |-
+            // 'address' and 'rw' are available here automatically
+            if (address == 0x40 && !rw) {
+               ESP_LOGD("custom", "Write request detected on 0x40!");
+            }
+
+
 
 
     Flash, then watch decoded I²C activity in Home Assistant and ESPHome logs.
