@@ -22,11 +22,23 @@ Features
 
     All code and comments are in English only; only code-relevant comments.
 
+Hardware Requirement
+    
+    The processing of the I2C signals requires sufficient processing power. Therefore ESP32 based devices have to be used.
+
 Typical use
 
     Sniff DDC/CI, EDID, EEPROM, or any generic I²C communication (e.g., between HDMI source and display, or microcontrollers).
 
 How to use
+
+    Configure the ESP device in ESPHome: ONLY FOR ESP32 !!
+    
+    esp32:
+      board: esp32dev
+      framework:
+        type: esp-idf #### Arduino framework is not Ok for ESP32 devices ####
+
 
     Add as a Git external component in ESPHome.
 
@@ -34,20 +46,26 @@ How to use
       - source: github://yourgithubuser/esphome-i2c-sniffer
         components: [ esphome_i2c_sniffer ]
 
+    
     Configure the custom text sensor and (optionally) the two numeric sensors in your ESPHome YAML.
 
     esphome_i2c_sniffer:
       id: i2c_sniffer # Set Identifier Name - mandatory for ESPHome 2025.11
-      sda_pin: 4 # GPIO4/D2 SDA I2C-Bus Data
-      scl_pin: 5 # GPIO5/D1 SCL I2C-Bus Clock
+      sda_pin: 21 # GPIO21 SDA I2C-Bus Data / ESP32
+      scl_pin: 22 # GPIO22 SCL I2C-Bus Clock / ESP32
+      
       msg_sensor:
         name: "I2C Message"
+      
       last_address_sensor:
         name: "I2C Last Address"
+      
       last_data_sensor:
         name: "I2C Frame Length"
+      
       last_byte_sensor:
         name: "I2C Last Byte Value"
+      
       on_address:
         - lambda: |-
             // 'address' and 'rw' are available here automatically
