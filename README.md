@@ -107,10 +107,7 @@ Add the component to your ESPHome YAML configuration using the `external_compone
  
 ```yaml
 external_components:
-  - source:
-      type: git
-      url: https://github.com/GernotAlthammer/esphome_i2c_sniffer
-      ref: main
+  - source: github://GernotAlthammer/esphome_i2c_sniffer
     components: [ esphome_i2c_sniffer ]
 ```
  
@@ -126,10 +123,7 @@ This minimal configuration sets up the sniffer on GPIO 16 (SDA) and GPIO 17 (SCL
  
 ```yaml
 external_components:
-  - source:
-      type: git
-      url: https://github.com/GernotAlthammer/esphome_i2c_sniffer
-      ref: main
+  - source: github://GernotAlthammer/esphome_i2c_sniffer
     components: [ esphome_i2c_sniffer ]
  
 esphome:
@@ -151,12 +145,12 @@ logger:
   level: DEBUG
  
 esphome_i2c_sniffer:
-  sda: GPIO16
-  scl: GPIO17
+  id: i2c_sniffer 
+  scl_pin: 19 
+  sda_pin: 18 
  
-text_sensor:
-  - platform: esphome_i2c_sniffer
-    name: "I2C Transaction"
+  msg_sensor:
+    name: "I2C Message"
 ```
  
 ### Full Example with Optional Sensors
@@ -165,10 +159,7 @@ This example additionally exposes the last-seen I²C address and last data byte 
  
 ```yaml
 external_components:
-  - source:
-      type: git
-      url: https://github.com/GernotAlthammer/esphome_i2c_sniffer
-      ref: main
+  - source: github://GernotAlthammer/esphome_i2c_sniffer
     components: [ esphome_i2c_sniffer ]
  
 esphome:
@@ -190,23 +181,48 @@ logger:
   level: DEBUG
  
 esphome_i2c_sniffer:
-  sda: GPIO16
-  scl: GPIO17
+  id: i2c_sniffer 
+  scl_pin: 19
+  sda_pin: 18
+
+  last_data_sensor:
+    name: "I2C Last Data"
+
+  last_byte_sensor:
+    name: "I2C Last Byte"
+
   on_address:
-    - address: 0x54
-      then:
-        - logger.log: "Detected device at address 0x54!"
+    - lambda: |-
+        // 'address' is available here automatically
+        if (address == 0x40 ) {
+           ESP_LOGD("I2C_Data", "I2C data detected on 0x40");
+        }
+
+  msg_sensor:
+    id: i2c_message_internal
+    internal: true
+
+    on_value:
+      - then:
+          - lambda: |-
+              std::string msg = x;
+              std::stringstream ss(msg);
+              std::string byte_str;
+              std::vector<int> bytes;
+              std::string decimal_output = "";
+
+              while (ss >> byte_str) {
+                if (byte_str.size() == 2 && isxdigit(byte_str[0]) && isxdigit(byte_str[1])) {
+                  int val = strtol(byte_str.c_str(), nullptr, 16);
+                  bytes.push_back(val);
+                  if (!decimal_output.empty()) decimal_output += ", ";
+                  decimal_output += std::to_string(val);
+                }
+              }
+              if (!bytes.empty() ) {
+                ESP_LOGD("I2C_Data", "Decimal: [%s]", decimal_output.c_str());
+              }
  
-text_sensor:
-  - platform: esphome_i2c_sniffer
-    name: "I2C Transaction"
- 
-sensor:
-  - platform: esphome_i2c_sniffer
-    last_address:
-      name: "I2C Last Address"
-    last_data:
-      name: "I2C Last Data Byte"
 ```
  
 ### Configuration Options Reference
@@ -215,23 +231,13 @@ sensor:
  
 | Option | Type | Required | Description |
 |---|---|---|---|
-| `sda` | Pin | **Yes** | GPIO pin connected to the SDA line of the monitored bus |
-| `scl` | Pin | **Yes** | GPIO pin connected to the SCL line of the monitored bus |
+| `sda_pin` | Pin | **Yes** | GPIO pin connected to the SDA line of the monitored bus |
+| `scl_pn` | Pin | **Yes** | GPIO pin connected to the SCL line of the monitored bus |
+| `id` | String | **Yes** | Entity ID for the decoded transaction text sensor in Home Assistant |
+| `name` | String | No | Entity name for the decoded transaction text sensor in Home Assistant |
+| `last_data_sensor` | Sensor config | No | Text sensor for the most recently captured data bytes |
+| `last_byte_sensor` | Sensor config | No | Numeric sensor (0–255) for the most recently captured data byte | 
 | `on_address` | Automation list | No | Callback triggered when a specific I²C address is seen on the bus |
- 
-#### `text_sensor` platform: `esphome_i2c_sniffer`
- 
-| Option | Type | Required | Description |
-|---|---|---|---|
-| `name` | String | **Yes** | Entity name for the decoded transaction text sensor in Home Assistant |
- 
-#### `sensor` platform: `esphome_i2c_sniffer`
- 
-| Option | Type | Required | Description |
-|---|---|---|---|
-| `last_address` | Sensor config | No | Numeric sensor (0–127) for the most recently captured 7-bit I²C address |
-| `last_data` | Sensor config | No | Numeric sensor (0–255) for the most recently captured data byte |
- 
 ---
  
 ## Output Format
@@ -267,9 +273,10 @@ This represents a combined register-read transaction:
  
 Once the device is running and connected to Home Assistant via the ESPHome API, the following entities will appear automatically:
  
-- **Text sensor** (`sensor.<name>_i2c_transaction`) — updates with every decoded I²C transaction
-- **Numeric sensor** (`sensor.<name>_i2c_last_address`) — the last seen 7-bit device address (optional)
-- **Numeric sensor** (`sensor.<name>_i2c_last_data_byte`) — the last seen data byte (optional)
+- **Message sensor** (`sensor.<name>_msg_sensor`) — updates with every decoded I²C transaction
+- **Numeric sensor** (`sensor.<name>_last_address_sensor`) — the last seen 7-bit device address (optional)
+- **Numeric sensor** (`sensor.<name>_last_data_sensor`) — the last seen data (optional)
+- **Numeric sensor** (`sensor.<name>_last_byte_sensor`) — the last seen data byte (optional)
  
 You can use these entities in **Lovelace dashboards**, **History graphs**, or **Home Assistant automations** to react to specific I²C activity.
  
@@ -283,12 +290,16 @@ The `on_address` callback is triggered each time a specified I²C device address
  
 ```yaml
 esphome_i2c_sniffer:
-  sda: GPIO16
-  scl: GPIO17
+  id: i2c_sniffer 
+  scl_pin: 19 
+  sda_pin: 18
   on_address:
-    - address: 0x3C
-      then:
-        - logger.log: "OLED display communication detected (0x3C)"
+    - lambda: |-
+        // 'address' is available here automatically
+        if (address == 0x3C ) {
+           ESP_LOGD("I2C_Data", "OLED display communication detected (0x3C)");
+        }
+
 ```
  
 Multiple `on_address` entries with different addresses can be listed in sequence.
@@ -305,8 +316,8 @@ Monitored Device (Master)         Target Device (Slave)
        SDA ──────────────────────────── SDA
        SCL ──────────────────────────── SCL
         |                                 |
-        └──────── SDA → GPIO16 (ESP32)
-        └──────── SCL → GPIO17 (ESP32)
+        └──────── SDA → GPIO18 (ESP32)
+        └──────── SCL → GPIO19 (ESP32)
                           │
                     [I2C Sniffer ESP32]
 ```
