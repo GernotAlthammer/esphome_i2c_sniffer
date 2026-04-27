@@ -21,7 +21,7 @@ EsphomeI2cSniffer = esphome_i2c_sniffer_ns.class_("EsphomeI2cSniffer", cg.Compon
 CONF_SDA_PIN = "sda_pin"
 CONF_SCL_PIN = "scl_pin"
 CONF_MSG_SENSOR = "msg_sensor"
-CONF_LAST_ADDR_SENSOR = "last_address_sensor"
+CONF_LAST_ADDR_SENSOR = "last_addr_sensor"
 CONF_LAST_DATA_SENSOR = "last_data_sensor"
 CONF_LAST_BYTE_SENSOR = "last_byte_sensor"
 CONF_ON_ADDRESS = "on_address" # Key for the automation trigger
@@ -71,7 +71,7 @@ async def to_code(config):
         
     if CONF_LAST_ADDR_SENSOR in config:
         sens = await sensor.new_sensor(config[CONF_LAST_ADDR_SENSOR])
-        cg.add(var.set_last_address_sensor(sens))
+        cg.add(var.set_last_addr_sensor(sens))
 
     if CONF_LAST_DATA_SENSOR in config:
         sens = await sensor.new_sensor(config[CONF_LAST_DATA_SENSOR])
