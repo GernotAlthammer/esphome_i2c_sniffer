@@ -109,9 +109,12 @@ Add the component to your ESPHome YAML configuration using the `external_compone
 external_components:
   - source: github://GernotAlthammer/esphome_i2c_sniffer
     components: [ esphome_i2c_sniffer ]
+    refresh: 1day
 ```
  
 No manual file downloads or copies are required. ESPHome will fetch the component automatically during compilation.
+
+Note: The standard interval the source will be checked by ESPHome is 1day. You can make ESPHome check the repository every time by setting this option to 0s, however since ESPHome is validating the configuration continuously while using the dashboard or the vscode extension, it is not recommended to set this value to less than a few minutes to avoid validation slow down and excessive repository checks.
  
 ---
  
@@ -190,6 +193,9 @@ esphome_i2c_sniffer:
 
   last_byte_sensor:
     name: "I2C Last Byte"
+
+  last_addr_sensor:
+    name: "I2C Last Addr"
 
   on_address:
     - lambda: |-
