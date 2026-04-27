@@ -109,12 +109,12 @@ Add the component to your ESPHome YAML configuration using the `external_compone
 external_components:
   - source: github://GernotAlthammer/esphome_i2c_sniffer
     components: [ esphome_i2c_sniffer ]
-    refresh: 1day
+    refresh: 1d
 ```
  
 No manual file downloads or copies are required. ESPHome will fetch the component automatically during compilation.
 
-Note: The standard interval the source will be checked by ESPHome is 1day. You can make ESPHome check the repository every time by setting this option to 0s, however since ESPHome is validating the configuration continuously while using the dashboard or the vscode extension, it is not recommended to set this value to less than a few minutes to avoid validation slow down and excessive repository checks.
+Note: The standard interval the source will be checked by ESPHome is 1d (1 day). You can make ESPHome check the repository every time by setting this option to 0s, however since ESPHome is validating the configuration continuously while using the dashboard or the vscode extension, it is not recommended to set this value to less than a few minutes to avoid validation slow down and excessive repository checks.
  
 ---
  
@@ -128,7 +128,8 @@ This minimal configuration sets up the sniffer on GPIO 16 (SDA) and GPIO 17 (SCL
 external_components:
   - source: github://GernotAlthammer/esphome_i2c_sniffer
     components: [ esphome_i2c_sniffer ]
- 
+    refresh: 1d
+
 esphome:
   name: i2c-sniffer
   friendly_name: I2C Sniffer
@@ -136,7 +137,7 @@ esphome:
 esp32:
   board: esp32dev
   framework:
-    type: arduino
+    type: esp-idf
  
 wifi:
   ssid: !secret wifi_ssid
@@ -154,6 +155,12 @@ esphome_i2c_sniffer:
  
   msg_sensor:
     name: "I2C Message"
+
+## Add one text_sensor to prevent compiler errors
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+ 
 ```
  
 ### Full Example with Optional Sensors
@@ -164,7 +171,8 @@ This example additionally exposes the last-seen I²C address and last data byte 
 external_components:
   - source: github://GernotAlthammer/esphome_i2c_sniffer
     components: [ esphome_i2c_sniffer ]
- 
+    refresh: 1d
+
 esphome:
   name: i2c-sniffer
   friendly_name: I2C Sniffer
@@ -172,7 +180,7 @@ esphome:
 esp32:
   board: esp32dev
   framework:
-    type: arduino
+    type: esp-idf
  
 wifi:
   ssid: !secret wifi_ssid
@@ -228,6 +236,11 @@ esphome_i2c_sniffer:
               if (!bytes.empty() ) {
                 ESP_LOGD("I2C_Data", "Decimal: [%s]", decimal_output.c_str());
               }
+
+## Add one text_sensor to prevent compiler errors
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
  
 ```
  
