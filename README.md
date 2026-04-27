@@ -241,8 +241,10 @@ esphome_i2c_sniffer:
 | `scl_pn` | Pin | **Yes** | GPIO pin connected to the SCL line of the monitored bus |
 | `id` | String | **Yes** | Entity ID for the decoded transaction text sensor in Home Assistant |
 | `name` | String | No | Entity name for the decoded transaction text sensor in Home Assistant |
+| `msg_sensor` | Text_sensor config | No | Text sensor for the most recently captured message | 
 | `last_data_sensor` | Sensor config | No | Text sensor for the most recently captured data bytes |
 | `last_byte_sensor` | Sensor config | No | Numeric sensor (0–255) for the most recently captured data byte | 
+| `last_addr_sensor` | Sensor config | No | Numeric sensor (0–255) for the most recently captured address | 
 | `on_address` | Automation list | No | Callback triggered when a specific I²C address is seen on the bus |
 ---
  
