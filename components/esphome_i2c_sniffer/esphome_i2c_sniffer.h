@@ -1,6 +1,7 @@
 // esphome I2C sniffer header for ESP32 ESP-IDF framework
 #pragma once
-
+#include <sstream>
+#include <vector>
 #include <string>
 #include "esphome/core/component.h"
 #include "esphome/core/log.h"
