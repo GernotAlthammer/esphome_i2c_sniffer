@@ -4,6 +4,9 @@ from esphome import automation
 from esphome.const import CONF_ID, CONF_TRIGGER_ID
 from esphome.components import sensor, text_sensor
 
+# Ensures that the related C++ parts are included
+AUTO_LOAD = ["sensor", "text_sensor"]
+
 # =================================================================
 # 1. Code Generation Setup
 # =================================================================
