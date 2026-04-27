@@ -156,10 +156,6 @@ esphome_i2c_sniffer:
   msg_sensor:
     name: "I2C Message"
 
-## Add one text_sensor to prevent compiler errors
-text_sensor:
-  - platform: version
-    name: "ESPHome Version"
  
 ```
  
@@ -237,10 +233,6 @@ esphome_i2c_sniffer:
                 ESP_LOGD("I2C_Data", "Decimal: [%s]", decimal_output.c_str());
               }
 
-## Add one text_sensor to prevent compiler errors
-text_sensor:
-  - platform: version
-    name: "ESPHome Version"
  
 ```
  
