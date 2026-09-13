@@ -1,7 +1,6 @@
 // esphome I2C sniffer header for ESP32 ESP-IDF framework
 #pragma once
-#include <sstream>
-#include <vector>
+
 #include <string>
 #include "esphome/core/component.h"
 #include "esphome/core/log.h"
@@ -44,8 +43,7 @@ class EsphomeI2cSniffer : public Component {
   void IRAM_ATTR on_sda_edge_();
 
  protected:
-  void publish_frame_(uint8_t addr, bool rw, bool addr_ack, const uint8_t *data,
-                       const bool *data_ack, uint8_t len, uint32_t t_ms);
+  void publish_frame_(uint8_t addr, bool rw, const uint8_t *data, uint8_t len);
 
   // ESP-IDF specific GPIO types
   gpio_num_t sda_pin_;
@@ -71,11 +69,8 @@ class EsphomeI2cSniffer : public Component {
   volatile bool ack_phase_{false};
   volatile uint8_t cur_byte_{0};
   volatile bool have_addr_{false};
-  volatile bool last_was_addr_{false};
   volatile uint8_t addr_{0};
   volatile bool rw_{false};
-  volatile bool addr_ack_{true};
-  volatile uint32_t frame_time_ms_{0};
 
   // Buffers
   volatile bool new_addr_event_{false};
@@ -84,7 +79,6 @@ class EsphomeI2cSniffer : public Component {
 
   static constexpr uint8_t MAX_DATA_ = 64;
   uint8_t data_[MAX_DATA_]{};
-  bool data_ack_[MAX_DATA_]{};
   volatile uint8_t data_len_{0};
   volatile bool frame_ready_{false};
 };
