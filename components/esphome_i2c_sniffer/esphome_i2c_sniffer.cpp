@@ -150,6 +150,7 @@ void EsphomeI2cSniffer::publish_frame_(uint8_t addr, bool rw, const uint8_t *dat
   if (this->msg_sensor_) this->msg_sensor_->publish_state(buf);
   if (this->last_addr_sensor_) this->last_addr_sensor_->publish_state(addr);
   if (this->last_data_sensor_) this->last_data_sensor_->publish_state(len);
+  if (this->last_byte_sensor_ && len > 0) this->last_byte_sensor_->publish_state(data[len - 1]);
 }
 
 void EsphomeI2cSniffer::dump_config() {
